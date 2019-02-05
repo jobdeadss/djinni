@@ -17,8 +17,10 @@ base_dir=$(cd "`dirname "$loc"`" && pwd)
 
 temp_out="$base_dir/djinni-output-temp"
 
-in="$base_dir/example.djinni"
+in1="$base_dir/KeyValueRepository.djinni"
+in2="$base_dir/Services.djinni"
 
+yaml_out="$base_dir/generated-src/yaml"
 cpp_out="$base_dir/generated-src/cpp"
 jni_out="$base_dir/generated-src/jni"
 objc_out="$base_dir/generated-src/objc"
@@ -51,28 +53,41 @@ fi
 
 [ ! -e "$temp_out" ] || rm -r "$temp_out"
 "$base_dir/../src/run-assume-built" \
-    --java-out "$temp_out/java" \
-    --java-package $java_package \
-    --java-class-access-modifier "package" \
-    --java-generate-interfaces true \
-    --java-nullable-annotation "javax.annotation.CheckForNull" \
-    --java-nonnull-annotation "javax.annotation.Nonnull" \
-    --ident-java-field mFooBar \
+    --yaml-out "$temp_out/yaml"\
+    --yaml-out-file "KeyValueRepository.yaml"\
     \
     --cpp-out "$temp_out/cpp" \
     --cpp-namespace textsort \
     --ident-cpp-enum-type foo_bar \
-    \
-    --jni-out "$temp_out/jni" \
-    --ident-jni-class NativeFooBar \
-    --ident-jni-file NativeFooBar \
+    --cpp-nn-header "\"$base_dir/include/nn/nn.hpp\"" \
+    --cpp-nn-type "dropbox::oxygen::nn_shared_ptr" \
+    --cpp-nn-check-expression "NN_CHECK_ASSERT" \
     \
     --objc-out "$temp_out/objc" \
     --objcpp-out "$temp_out/objc" \
     --objc-type-prefix TXS \
     --objc-swift-bridging-header "TextSort-Bridging-Header" \
     \
-    --idl "$in"
+    --idl "$in1"
+
+"$base_dir/../src/run-assume-built" \
+    --yaml-out "$temp_out/yaml"\
+    --yaml-out-file "Configuration.yaml"\
+    --idl-include-path "$temp_out/yaml"\
+    \
+    --cpp-out "$temp_out/cpp" \
+    --cpp-namespace textsort \
+    --ident-cpp-enum-type foo_bar \
+    --cpp-nn-header "\"$base_dir/include/nn/nn.hpp\"" \
+    --cpp-nn-type "dropbox::oxygen::nn_shared_ptr" \
+    --cpp-nn-check-expression "NN_CHECK_ASSERT" \
+    \
+    --objc-out "$temp_out/objc" \
+    --objcpp-out "$temp_out/objc" \
+    --objc-type-prefix TXS \
+    --objc-swift-bridging-header "TextSort-Bridging-Header" \
+    \
+    --idl "$in2"
 
 # Copy changes from "$temp_output" to final dir.
 
@@ -85,6 +100,7 @@ mirror() {
 }
 
 echo "Copying generated code to final directories..."
+mirror "yaml" "$temp_out/yaml" "$yaml_out"
 mirror "cpp" "$temp_out/cpp" "$cpp_out"
 mirror "java" "$temp_out/java" "$java_out"
 mirror "jni" "$temp_out/jni" "$jni_out"

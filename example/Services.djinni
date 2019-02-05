@@ -1,0 +1,6 @@
+@extern "KeyValueRepository.yaml"
+
+configuration = interface +c 
+{ 
+	key_value_repository(): key_value_repository; 
+}

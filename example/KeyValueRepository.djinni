@@ -1,0 +1,6 @@
+key_value_repository = interface +c 
+{ 
+	get_value(key: string): binary; 
+	set_value(key: string, value: binary): bool;
+	remove_value(key: string): bool; 
+}
